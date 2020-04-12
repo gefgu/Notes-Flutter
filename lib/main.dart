@@ -102,10 +102,22 @@ class NotesWidgetState extends State<NotesWidget> {
           title: new Text(
             "Note Screen",
           ),
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.edit),
+              onPressed: () {},
+            ),
+            IconButton(
+              icon: Icon(Icons.delete),
+              onPressed: () {
+                _confirmDelete(note);
+              },
+            ),
+          ],
         ),
         body: Container(
-          padding: const EdgeInsets.all(16.0),
           child: ListView(
+            padding: const EdgeInsets.all(16.0),
             children: <Widget>[
               Text(
                 note.title,
@@ -169,8 +181,46 @@ class NotesWidgetState extends State<NotesWidget> {
 
   void _addNote(Note note) async {
     DatabaseHelper helper = DatabaseHelper.instance;
-    setState(() async {
-      note.id = await helper.insertNote(note);
-    });
+    note.id = await helper.insertNote(note);
+    setState(() {});
+  }
+
+  void _confirmDelete(Note note) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: Colors.red,
+            title: new Text("Are you sure to delete ${note.title}?"),
+            actions: <Widget>[
+              FlatButton(
+                child: Text(
+                  "Cancel",
+                  style: TextStyle(fontSize: 18.0, color: Colors.black),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              FlatButton(
+                child: Text(
+                  "Delete",
+                  style: TextStyle(fontSize: 18.0, color: Colors.black),
+                ),
+                onPressed: () {
+                  _deleteNote(note);
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+              )
+            ],
+          );
+        });
+  }
+
+  void _deleteNote(Note note) async {
+    DatabaseHelper helper = DatabaseHelper.instance;
+    await helper.deleteNote(note.id);
+    setState(() {});
   }
 }

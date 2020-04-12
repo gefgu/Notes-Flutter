@@ -120,4 +120,9 @@ class DatabaseHelper {
 
     return id;
   }
+
+  Future<int> deleteNote(int id) async {
+    Database db = await database;
+    return await db.delete(tableNotes, where: '$columnId = ?', whereArgs: [id]);
+  }
 }
