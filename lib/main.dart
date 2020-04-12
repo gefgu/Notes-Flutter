@@ -105,7 +105,9 @@ class NotesWidgetState extends State<NotesWidget> {
           actions: <Widget>[
             IconButton(
               icon: Icon(Icons.edit),
-              onPressed: () {},
+              onPressed: () {
+                _pushEditNoteScreen(note);
+              },
             ),
             IconButton(
               icon: Icon(Icons.delete),
@@ -221,6 +223,56 @@ class NotesWidgetState extends State<NotesWidget> {
   void _deleteNote(Note note) async {
     DatabaseHelper helper = DatabaseHelper.instance;
     await helper.deleteNote(note.id);
+    setState(() {});
+  }
+
+  void _pushEditNoteScreen(Note note) {
+    final _titleController = TextEditingController()..text = note.title;
+    final _contentController = TextEditingController()..text = note.body;
+
+    Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+      return new Scaffold(
+        appBar: new AppBar(
+          title: new Text("Edit Note"),
+        ),
+        body: Container(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: <Widget>[
+              TextField(
+                decoration: new InputDecoration(
+                  labelText: "Title",
+                ),
+                controller: _titleController,
+              ),
+              TextField(
+                maxLines: null,
+                keyboardType: TextInputType.multiline,
+                decoration: new InputDecoration(
+                  labelText: "Content",
+                ),
+                controller: _contentController,
+              ),
+              RaisedButton(
+                onPressed: () async {
+                  note.title = _titleController.text;
+                  note.body = _contentController.text;
+                  _editNote(note);
+                  Navigator.pop(context);
+                  print("Edited note: " + note.toMap().toString());
+                },
+                child: Text("Submit"),
+              )
+            ],
+          ),
+        ),
+      );
+    }));
+  }
+
+  void _editNote(Note note) async {
+    DatabaseHelper helper = DatabaseHelper.instance;
+    await helper.update(note);
     setState(() {});
   }
 }
