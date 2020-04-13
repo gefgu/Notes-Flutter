@@ -2,14 +2,14 @@ import 'package:knightnotes/database_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:knightnotes/state_container.dart';
 
-class NoteForm extends StatefulWidget {
-  const NoteForm({Key key}) : super(key: key);
+class AddNoteForm extends StatefulWidget {
+  const AddNoteForm({Key key}) : super(key: key);
 
   @override
-  NoteFormState createState() => NoteFormState();
+  AddNoteFormState createState() => AddNoteFormState();
 }
 
-class NoteFormState extends State<NoteForm> {
+class AddNoteFormState extends State<AddNoteForm> {
   Note note = Note();
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
@@ -78,9 +78,8 @@ class NoteFormState extends State<NoteForm> {
               onPressed: () async {
                 note.title = _titleController.text;
                 note.body = _contentController.text;
-                Navigator.pop(context);
-                container.addNote(note);
-                print("Added note: " + note.toMap().toString());
+                await container.addNote(note);
+                Navigator.popUntil(context, ModalRoute.withName('/'));
               },
               child: Text("Submit"),
             ),

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:knightnotes/database_helpers.dart';
 import 'package:knightnotes/state_container.dart';
-import 'package:knightnotes/note_form_screen.dart';
+import 'package:knightnotes/add_note_screen.dart';
+import 'package:knightnotes/edit_note_screen.dart';
 
 void main() => runApp(new StateContainer(
       child: MyApp(),
@@ -15,6 +16,11 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Knight Notes',
       home: new NotesWidget(),
+      initialRoute: '/',
+      routes: {
+        '/add_note_screen': (context) => AddNoteForm(),
+        '/edit_note_screen': (context) => EditNoteForm()
+      },
     );
   }
 }
@@ -55,7 +61,7 @@ class NotesWidgetState extends State<NotesWidget> {
       ),
       floatingActionButton: new FloatingActionButton(
         onPressed: () {
-          _pushAddNoteScreen();
+          Navigator.pushNamed(context, '/add_note_screen');
         },
         child: Icon(Icons.add),
       ),
@@ -97,7 +103,8 @@ class NotesWidgetState extends State<NotesWidget> {
             IconButton(
               icon: Icon(Icons.edit),
               onPressed: () {
-                _pushEditNoteScreen(note);
+                Navigator.pushNamed(context, "/edit_note_screen",
+                    arguments: note);
               },
             ),
             IconButton(
@@ -127,12 +134,6 @@ class NotesWidgetState extends State<NotesWidget> {
     }));
   }
 
-  void _pushAddNoteScreen() {
-    Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
-      return NoteForm();
-    }));
-  }
-
   void _confirmDelete(Note note) {
     final container = StateContainer.of(context);
     showDialog(
@@ -156,61 +157,16 @@ class NotesWidgetState extends State<NotesWidget> {
                   "Delete",
                   style: TextStyle(fontSize: 18.0, color: Colors.black),
                 ),
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-                  setState(() {
-                    container.deleteNote(note);
-                  });
+                onPressed: () async {
+                  print("Added note: " + note.toMap().toString());
+                  await container.deleteNote(note);
+                  Navigator.popUntil(context, ModalRoute.withName('/'));
                 },
               )
             ],
           );
         });
   }
-
-  void _pushEditNoteScreen(Note note) {
-    final _titleController = TextEditingController()..text = note.title;
-    final _contentController = TextEditingController()..text = note.body;
-    final container = StateContainer.of(context);
-
-    Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
-      return new Scaffold(
-        appBar: new AppBar(
-          title: new Text("Edit Note"),
-        ),
-        body: Container(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: <Widget>[
-              TextField(
-                decoration: new InputDecoration(
-                  labelText: "Title",
-                ),
-                controller: _titleController,
-              ),
-              TextField(
-                maxLines: null,
-                keyboardType: TextInputType.multiline,
-                decoration: new InputDecoration(
-                  labelText: "Content",
-                ),
-                controller: _contentController,
-              ),
-              RaisedButton(
-                onPressed: () async {
-                  note.title = _titleController.text;
-                  note.body = _contentController.text;
-                  container.editNote(note);
-                  Navigator.pop(context);
-                  print("Edited note: " + note.toMap().toString());
-                },
-                child: Text("Submit"),
-              )
-            ],
-          ),
-        ),
-      );
-    }));
-  }
 }
+
+// ADD CRUD TO CATEGORIES, Long press

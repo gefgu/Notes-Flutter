@@ -42,15 +42,16 @@ class StateContainer extends StatefulWidget {
 class StateContainerState extends State<StateContainer> {
   AppState appState;
 
-  void addNote(Note note) async {
+  Future<void> addNote(Note note) async {
     DatabaseHelper helper = DatabaseHelper.instance;
     note.id = await helper.insertNote(note);
     setState(() {
       appState.notes.add(note);
     });
+    print("Added note: " + note.toMap().toString());
   }
 
-  void deleteNote(Note note) async {
+  Future<void> deleteNote(Note note) async {
     DatabaseHelper helper = DatabaseHelper.instance;
     await helper.deleteNote(note.id);
     setState(() {
@@ -59,7 +60,7 @@ class StateContainerState extends State<StateContainer> {
     print("Delete note:" + note.toMap().toString());
   }
 
-  void editNote(Note note) async {
+  Future<void> editNote(Note note) async {
     DatabaseHelper helper = DatabaseHelper.instance;
     await helper.update(note);
     setState(() {
