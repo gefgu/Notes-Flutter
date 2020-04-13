@@ -57,6 +57,11 @@ class Category {
     id = map[columnId];
     name = map[columnCategoryName];
   }
+
+  @override
+  String toString() {
+    return name;
+  }
 }
 
 class DatabaseHelper {
@@ -117,6 +122,13 @@ class DatabaseHelper {
   Future<int> insertNote(Note note) async {
     Database db = await database;
     int id = await db.insert(tableNotes, note.toMap());
+
+    return id;
+  }
+
+  Future<int> insertCategory(Category category) async {
+    Database db = await database;
+    int id = await db.insert(tableCategories, category.toMap());
 
     return id;
   }

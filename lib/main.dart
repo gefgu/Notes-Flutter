@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:knightnotes/database_helpers.dart';
+import 'package:knightnotes/state_container.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(new StateContainer(
+      child: MyApp(),
+    ));
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -10,7 +13,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Knight Notes',
-      home: NotesWidget(),
+      home: new NotesWidget(),
     );
   }
 }
@@ -23,19 +26,28 @@ class NotesWidget extends StatefulWidget {
 }
 
 class NotesWidgetState extends State<NotesWidget> {
-  List<Note> _notes;
-  List<Category> _categories;
-
-  Future<dynamic> getStuffFromDatabase() async {
-    DatabaseHelper helper = DatabaseHelper.instance;
-    _categories = await helper.getAllCategories();
-    _notes = await helper.getAllNotes();
-    print([_categories, _notes].toString());
-    return [_categories, _notes];
-  }
-
   @override
   Widget build(BuildContext context) {
+    final container = StateContainer.of(context);
+    Widget widgetReturn;
+    if (container.appState != null) {
+      var _notes = container.appState.notes;
+      widgetReturn = ListView.builder(
+        padding: const EdgeInsets.all(16.0),
+        itemCount: _notes.length,
+        itemBuilder: (BuildContext context, int index) {
+          if (index < _notes.length) {
+            return noteTile(_notes[_notes.length - 1 - index]);
+          }
+          return null;
+        },
+      );
+    } else {
+      widgetReturn = Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
     return Scaffold(
       appBar: new AppBar(
         title: new Text("Knight Notes"),
@@ -46,29 +58,7 @@ class NotesWidgetState extends State<NotesWidget> {
         },
         child: Icon(Icons.add),
       ),
-      body: new FutureBuilder(
-        future: getStuffFromDatabase(),
-        builder: (context, snapshot) {
-          Widget widgetReturn;
-          if (snapshot.hasData) {
-            widgetReturn = ListView.builder(
-              padding: const EdgeInsets.all(16.0),
-              itemCount: _notes.length,
-              itemBuilder: (BuildContext context, int index) {
-                if (index < _notes.length) {
-                  return noteTile(_notes[_notes.length - 1 - index]);
-                }
-                return null;
-              },
-            );
-          } else if (snapshot.hasError) {
-            widgetReturn = Text(snapshot.error.toString());
-          } else {
-            widgetReturn = CircularProgressIndicator();
-          }
-          return widgetReturn;
-        },
-      ),
+      body: widgetReturn,
     );
   }
 
@@ -140,8 +130,11 @@ class NotesWidgetState extends State<NotesWidget> {
     Note note = Note();
     final _titleController = TextEditingController();
     final _contentController = TextEditingController();
+    String selectedCategory;
+    final container = StateContainer.of(context);
 
     Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+      List<Category> _categories = container.appState.categories;
       return new Scaffold(
         appBar: new AppBar(
           title: new Text("Add Note"),
@@ -164,16 +157,48 @@ class NotesWidgetState extends State<NotesWidget> {
                 ),
                 controller: _contentController,
               ),
+              new Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  new DropdownButton<String>(
+                    value: selectedCategory,
+                    hint: Text("Select the Category"),
+                    items: _categories.map((Category category) {
+                      return new DropdownMenuItem(
+                        child: new Text(category.name),
+                        value: category.name,
+                      );
+                    }).toList(),
+                    onChanged: (String categoryName) {
+                      Category categoryFromName = _categories
+                          .where((category) => category.name == categoryName)
+                          .toList()[0];
+                      note.categoryId = categoryFromName.id;
+                      setState(() {
+                        selectedCategory = categoryName;
+                      });
+                    },
+                  ),
+                  new RaisedButton(
+                    onPressed: () {
+                      _pushAddCategoryScreen();
+                    },
+                    child: Row(
+                      children: <Widget>[Icon(Icons.add), Text("Add Category")],
+                    ),
+                  )
+                ],
+              ),
               RaisedButton(
                 onPressed: () async {
                   note.title = _titleController.text;
                   note.body = _contentController.text;
-                  _addNote(note);
+                  container.addNote(note);
                   Navigator.pop(context);
                   print("Added note: " + note.toMap().toString());
                 },
                 child: Text("Submit"),
-              )
+              ),
             ],
           ),
         ),
@@ -181,13 +206,8 @@ class NotesWidgetState extends State<NotesWidget> {
     }));
   }
 
-  void _addNote(Note note) async {
-    DatabaseHelper helper = DatabaseHelper.instance;
-    note.id = await helper.insertNote(note);
-    setState(() {});
-  }
-
   void _confirmDelete(Note note) {
+    final container = StateContainer.of(context);
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -210,7 +230,7 @@ class NotesWidgetState extends State<NotesWidget> {
                   style: TextStyle(fontSize: 18.0, color: Colors.black),
                 ),
                 onPressed: () {
-                  _deleteNote(note);
+                  container.deleteNote(note);
                   Navigator.pop(context);
                   Navigator.pop(context);
                 },
@@ -220,15 +240,10 @@ class NotesWidgetState extends State<NotesWidget> {
         });
   }
 
-  void _deleteNote(Note note) async {
-    DatabaseHelper helper = DatabaseHelper.instance;
-    await helper.deleteNote(note.id);
-    setState(() {});
-  }
-
   void _pushEditNoteScreen(Note note) {
     final _titleController = TextEditingController()..text = note.title;
     final _contentController = TextEditingController()..text = note.body;
+    final container = StateContainer.of(context);
 
     Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
       return new Scaffold(
@@ -257,7 +272,7 @@ class NotesWidgetState extends State<NotesWidget> {
                 onPressed: () async {
                   note.title = _titleController.text;
                   note.body = _contentController.text;
-                  _editNote(note);
+                  container.editNote(note);
                   Navigator.pop(context);
                   print("Edited note: " + note.toMap().toString());
                 },
@@ -270,9 +285,32 @@ class NotesWidgetState extends State<NotesWidget> {
     }));
   }
 
-  void _editNote(Note note) async {
-    DatabaseHelper helper = DatabaseHelper.instance;
-    await helper.update(note);
-    setState(() {});
+  void _pushAddCategoryScreen() {
+    Category category = Category();
+    final container = StateContainer.of(context);
+
+    Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+      return new Scaffold(
+        appBar: new AppBar(
+          title: new Text("Add Category"),
+        ),
+        body: new Container(
+            padding: const EdgeInsets.all(16.0),
+            child: new Column(
+              children: <Widget>[
+                new TextField(
+                  decoration: new InputDecoration(labelText: "Category Name"),
+                  onSubmitted: (name) async {
+                    category.name = name;
+                    container.addCategory(category);
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                    _pushAddNoteScreen();
+                  },
+                )
+              ],
+            )),
+      );
+    }));
   }
 }
