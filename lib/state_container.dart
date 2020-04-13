@@ -45,8 +45,9 @@ class StateContainerState extends State<StateContainer> {
   void addNote(Note note) async {
     DatabaseHelper helper = DatabaseHelper.instance;
     note.id = await helper.insertNote(note);
-    appState.notes.add(note);
-    setState(() {});
+    setState(() {
+      appState.notes.add(note);
+    });
   }
 
   void deleteNote(Note note) async {
@@ -55,6 +56,7 @@ class StateContainerState extends State<StateContainer> {
     setState(() {
       appState.notes.remove(note);
     });
+    print("Delete note:" + note.toMap().toString());
   }
 
   void editNote(Note note) async {
