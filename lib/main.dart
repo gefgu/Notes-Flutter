@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'state_container.dart';
-import 'add_note_screen.dart';
-import 'edit_note_screen.dart';
+import 'form_note_screen.dart';
 import 'note_screen.dart';
 import 'data_models/note_model.dart';
 
@@ -19,8 +18,7 @@ class MyApp extends StatelessWidget {
       home: new NotesWidget(),
       initialRoute: '/',
       routes: {
-        '/add_note_screen': (context) => AddNoteForm(),
-        '/edit_note_screen': (context) => EditNoteForm(),
+        '/form_note_screen': (context) => NoteForm(),
         '/note_screen': (context) => NoteScreen(),
       },
     );
@@ -63,7 +61,7 @@ class NotesWidgetState extends State<NotesWidget> {
       ),
       floatingActionButton: new FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, '/add_note_screen');
+          Navigator.pushNamed(context, '/form_note_screen', arguments: Note());
         },
         child: Icon(Icons.add),
       ),
@@ -96,7 +94,8 @@ class NotesWidgetState extends State<NotesWidget> {
 }
 
 // MEGA REFACTOR
-// 2 - JOIN ALL ADD EDIT FORMS IN ONE
+// 1 - JOIN ALL ADD EDIT FORMS IN ONE
+// 2 - CREATE CLASS TO CATEGORY CRUD
 
 // UI
 // GIVE A NICE LOOKING TO THE APP

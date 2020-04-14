@@ -3,15 +3,15 @@ import 'data_models/category_model.dart';
 import 'package:flutter/material.dart';
 import 'state_container.dart';
 
-class AddNoteForm extends StatefulWidget {
-  const AddNoteForm({Key key}) : super(key: key);
+class NoteForm extends StatefulWidget {
+  const NoteForm({Key key}) : super(key: key);
 
   @override
-  AddNoteFormState createState() => AddNoteFormState();
+  NoteFormState createState() => NoteFormState();
 }
 
-class AddNoteFormState extends State<AddNoteForm> {
-  Note note = Note();
+class NoteFormState extends State<NoteForm> {
+  Note note;
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   String selectedCategory;
@@ -20,10 +20,27 @@ class AddNoteFormState extends State<AddNoteForm> {
   Widget build(BuildContext context) {
     final container = StateContainer.of(context);
     var _categories = container.appState.categories;
+    String barText;
+    note = ModalRoute.of(context).settings.arguments;
+    var functionToCall;
+
+    if (note.title == null) {
+      barText = "Add Note";
+      functionToCall = (Note note) => container.addNote(note);
+    } else {
+      barText = "Edit Note";
+      _titleController..text = note.title;
+      _contentController..text = note.body;
+      selectedCategory = container.appState.categories
+          .where((category) => category.id == note.categoryId)
+          .toList()[0]
+          .name;
+      functionToCall = (Note note) => container.editNote(note);
+    }
 
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text("Add Note"),
+        title: new Text(barText),
       ),
       body: Container(
         padding: const EdgeInsets.all(16.0),
@@ -91,7 +108,7 @@ class AddNoteFormState extends State<AddNoteForm> {
               onPressed: () async {
                 note.title = _titleController.text;
                 note.body = _contentController.text;
-                await container.addNote(note);
+                await functionToCall(note);
                 Navigator.popUntil(context, ModalRoute.withName('/'));
               },
               child: Text("Submit"),

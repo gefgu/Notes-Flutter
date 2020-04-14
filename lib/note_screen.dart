@@ -24,7 +24,7 @@ class NoteScreenState extends State<NoteScreen> {
           IconButton(
             icon: Icon(Icons.edit),
             onPressed: () {
-              Navigator.pushNamed(context, "/edit_note_screen",
+              Navigator.pushNamed(context, "/form_note_screen",
                   arguments: note);
             },
           ),
