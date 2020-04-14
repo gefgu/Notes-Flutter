@@ -1,5 +1,7 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'data_models/category_model.dart';
+import 'data_models/note_model.dart';
 
 final String tableNotes = 'notes';
 final String columnId = "_id";
@@ -8,61 +10,6 @@ final String columnBody = "body";
 final String columnForeign = "foreignCategory";
 final String tableCategories = "categories";
 final String columnCategoryName = "category";
-
-class Note {
-  int id;
-  String title;
-  String body;
-  int categoryId;
-
-  Map<String, dynamic> toMap() {
-    var map = <String, dynamic>{
-      columnTitle: title,
-      columnBody: body,
-      columnForeign: categoryId,
-    };
-    if (id != null) {
-      map[columnId] = id;
-    }
-    return map;
-  }
-
-  Note();
-
-  Note.fromMap(Map<String, dynamic> map) {
-    id = map[columnId];
-    title = map[columnTitle];
-    body = map[columnBody];
-    categoryId = map[columnForeign];
-  }
-}
-
-class Category {
-  int id;
-  String name;
-
-  Map<String, dynamic> toMap() {
-    var map = <String, dynamic>{
-      columnCategoryName: name,
-    };
-    if (id != null) {
-      map[columnId] = id;
-    }
-    return map;
-  }
-
-  Category();
-
-  Category.fromMap(Map<String, dynamic> map) {
-    id = map[columnId];
-    name = map[columnCategoryName];
-  }
-
-  @override
-  String toString() {
-    return name;
-  }
-}
 
 class DatabaseHelper {
   static final _databaseName = "knight_note.db";
@@ -146,12 +93,13 @@ class DatabaseHelper {
 
   Future<int> deleteCategory(int id) async {
     Database db = await database;
-    return await db.delete(tableNotes, where: '$columnId = ?', whereArgs: [id]);
+    return await db
+        .delete(tableCategories, where: '$columnId = ?', whereArgs: [id]);
   }
 
   Future<int> updateCategory(Category category) async {
     Database db = await database;
-    return await db.update(tableNotes, category.toMap(),
+    return await db.update(tableCategories, category.toMap(),
         where: '$columnId = ?', whereArgs: [category.id]);
   }
 }

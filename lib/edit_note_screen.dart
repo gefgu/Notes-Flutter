@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:knightnotes/database_helpers.dart';
-import 'package:knightnotes/state_container.dart';
+import 'state_container.dart';
+import 'data_models/category_model.dart';
+import 'data_models/note_model.dart';
 
 class EditNoteForm extends StatefulWidget {
   const EditNoteForm({Key key}) : super(key: key);

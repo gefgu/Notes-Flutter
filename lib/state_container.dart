@@ -1,12 +1,8 @@
-import 'package:flutter/cupertino.dart';
-import 'package:knightnotes/database_helpers.dart';
-
-class AppState {
-  List<Note> notes;
-  List<Category> categories;
-
-  AppState(this.notes, this.categories);
-}
+import 'database_helpers.dart';
+import 'data_models/category_model.dart';
+import 'data_models/note_model.dart';
+import 'data_models/app_state_model.dart';
+import 'package:flutter/material.dart';
 
 class _InheritedStateContainer extends InheritedWidget {
   final StateContainerState data;
@@ -90,7 +86,7 @@ class StateContainerState extends State<StateContainer> {
 
   Future<void> deleteCategory(Category category) async {
     DatabaseHelper helper = DatabaseHelper.instance;
-    await helper.deleteNote(category.id);
+    await helper.deleteCategory(category.id);
     setState(() {
       appState.categories.remove(category);
     });
