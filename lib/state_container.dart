@@ -62,7 +62,7 @@ class StateContainerState extends State<StateContainer> {
 
   Future<void> editNote(Note note) async {
     DatabaseHelper helper = DatabaseHelper.instance;
-    await helper.update(note);
+    await helper.updateNote(note);
     setState(() {
       appState.notes
           .where((noteSelected) => noteSelected.id == note.id)
@@ -76,6 +76,25 @@ class StateContainerState extends State<StateContainer> {
     setState(() {
       appState.categories.add(category);
     });
+  }
+
+  Future<void> editCategory(Category category) async {
+    DatabaseHelper helper = DatabaseHelper.instance;
+    await helper.updateCategory(category);
+    setState(() {
+      appState.categories
+          .where((categorySelected) => category.id == category.id)
+          .toList()[0] = category;
+    });
+  }
+
+  Future<void> deleteCategory(Category category) async {
+    DatabaseHelper helper = DatabaseHelper.instance;
+    await helper.deleteNote(category.id);
+    setState(() {
+      appState.categories.remove(category);
+    });
+    print("Delete note:" + category.toMap().toString());
   }
 
   Future<void> getStuffFromDatabase() async {

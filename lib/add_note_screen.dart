@@ -42,6 +42,9 @@ class AddNoteFormState extends State<AddNoteForm> {
               ),
               controller: _contentController,
             ),
+            SizedBox(
+              height: 36,
+            ),
             new Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
@@ -64,15 +67,24 @@ class AddNoteFormState extends State<AddNoteForm> {
                     });
                   },
                 ),
-                new RaisedButton(
-                  onPressed: () {
-                    _pushAddCategoryScreen();
-                  },
-                  child: Row(
-                    children: <Widget>[Icon(Icons.add), Text("Add Category")],
+                RaisedButton(
+                  child: new Row(
+                    children: <Widget>[
+                      Icon(Icons.edit),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Text("Edit Categories")
+                    ],
                   ),
-                )
+                  onPressed: () {
+                    _pushCategoriesScreen();
+                  },
+                ),
               ],
+            ),
+            SizedBox(
+              height: 36,
             ),
             RaisedButton(
               onPressed: () async {
@@ -116,5 +128,124 @@ class AddNoteFormState extends State<AddNoteForm> {
             )),
       );
     }));
+  }
+
+  void _pushCategoriesScreen() {
+    final container = StateContainer.of(context);
+    List<Category> _categories = container.appState.categories;
+
+    Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+      return new Scaffold(
+        appBar: new AppBar(
+          title: new Text("Categories"),
+        ),
+        floatingActionButton: new FloatingActionButton(
+          onPressed: () {
+            _pushAddCategoryScreen();
+          },
+          child: new Icon(Icons.add),
+        ),
+        body: new ListView.builder(
+          padding: const EdgeInsets.all(16.0),
+          itemCount: _categories.length,
+          itemBuilder: (BuildContext context, int index) {
+            if (index < _categories.length) {
+              return ListTile(
+                title: new Text(_categories[index].name),
+                trailing: PopupMenuButton<String>(
+                  onSelected: (String selected) {
+                    if (selected == "Edit") {
+                      _pushEditCategoryScreen(_categories[index]);
+                    } else if (selected == "Delete") {
+                      _pushDeleteCategoryScreen(_categories[index]);
+                    }
+                  },
+                  itemBuilder: (BuildContext context) =>
+                      <PopupMenuEntry<String>>[
+                    const PopupMenuItem<String>(
+                      value: "Edit",
+                      child: Text("Edit"),
+                    ),
+                    const PopupMenuItem<String>(
+                      value: "Delete",
+                      child: Text("Delete"),
+                    ),
+                  ],
+                ),
+              );
+            }
+            return null;
+          },
+        ),
+      );
+    }));
+  }
+
+  void _pushEditCategoryScreen(Category category) {
+    final container = StateContainer.of(context);
+    final TextEditingController _nameController = TextEditingController()
+      ..text = category.name;
+
+    Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+      return new Scaffold(
+        appBar: new AppBar(
+          title: new Text("Edit Category"),
+        ),
+        body: new Container(
+            padding: const EdgeInsets.all(16.0),
+            child: new Column(
+              children: <Widget>[
+                new TextField(
+                  controller: _nameController,
+                  decoration: new InputDecoration(labelText: "Category Name"),
+                  onSubmitted: (name) async {
+                    category.name = name;
+                    setState(() {
+                      container.editCategory(category);
+                    });
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                    _pushCategoriesScreen();
+                  },
+                )
+              ],
+            )),
+      );
+    }));
+  }
+
+  void _pushDeleteCategoryScreen(Category category) {
+    final container = StateContainer.of(context);
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: Colors.red,
+            title: new Text("Are you sure to delete ${category.name}?"),
+            actions: <Widget>[
+              FlatButton(
+                child: Text(
+                  "Cancel",
+                  style: TextStyle(fontSize: 18.0, color: Colors.black),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              FlatButton(
+                child: Text(
+                  "Delete",
+                  style: TextStyle(fontSize: 18.0, color: Colors.black),
+                ),
+                onPressed: () async {
+                  await container.deleteCategory(category);
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                  _pushCategoriesScreen();
+                },
+              )
+            ],
+          );
+        });
   }
 }

@@ -158,7 +158,6 @@ class NotesWidgetState extends State<NotesWidget> {
                   style: TextStyle(fontSize: 18.0, color: Colors.black),
                 ),
                 onPressed: () async {
-                  print("Added note: " + note.toMap().toString());
                   await container.deleteNote(note);
                   Navigator.popUntil(context, ModalRoute.withName('/'));
                 },
@@ -169,4 +168,4 @@ class NotesWidgetState extends State<NotesWidget> {
   }
 }
 
-// ADD CRUD TO CATEGORIES, Long press
+// ADD CRUD TO CATEGORIES
