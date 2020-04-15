@@ -66,7 +66,7 @@ class StateContainerState extends State<StateContainer> {
     });
   }
 
-  void addCategory(Category category) async {
+  Future<void> addCategory(Category category) async {
     DatabaseHelper helper = DatabaseHelper.instance;
     category.id = await helper.insertCategory(category);
     setState(() {

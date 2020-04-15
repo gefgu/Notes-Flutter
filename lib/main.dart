@@ -3,6 +3,8 @@ import 'state_container.dart';
 import 'form_note_screen.dart';
 import 'note_screen.dart';
 import 'data_models/note_model.dart';
+import 'form_category.dart';
+import 'category_screen.dart';
 
 void main() => runApp(new StateContainer(
       child: MyApp(),
@@ -20,6 +22,8 @@ class MyApp extends StatelessWidget {
       routes: {
         '/form_note_screen': (context) => NoteForm(),
         '/note_screen': (context) => NoteScreen(),
+        '/form_category': (context) => CategoryForm(),
+        '/category_screen': (context) => CategoryScreen(),
       },
     );
   }
